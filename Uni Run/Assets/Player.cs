@@ -5,6 +5,10 @@ public class Player : MonoBehaviour
     public float jumpForce = 10f;
     public int jumpCountMax = 2;
 
+    public AudioClip dieAudioClip;
+
+    private AudioSource audioSource;
+
     public int jumpCount = 0;
     private Animator animator;
     private Rigidbody2D rb;
@@ -18,6 +22,7 @@ public class Player : MonoBehaviour
     {
         animator = GetComponent<Animator>();
         rb = GetComponent<Rigidbody2D>();
+        audioSource = GetComponent<AudioSource>();
     }
 
     private void Update()
@@ -36,6 +41,13 @@ public class Player : MonoBehaviour
             rb.linearVelocity = Vector2.zero;
             rb.AddForce(new Vector2(0f, jumpForce), ForceMode2D.Impulse);
             ++jumpCount;
+
+            audioSource.Play();
+        }
+
+        if (Input.GetMouseButtonUp(0) && rb.linearVelocity.y > 0)
+        {
+            rb.linearVelocity *= 0.5f;
         }
 
 
@@ -52,7 +64,7 @@ public class Player : MonoBehaviour
 
     private void OnCollisionEnter2D(Collision2D collision)
     {
-        if (collision.collider.CompareTag("Platform"))
+        if (collision.collider.CompareTag("Platform") && collision.contacts[0].normal.y > 0.7f)
         {
             jumpCount = 0;
             isGrounded = true;
@@ -75,5 +87,11 @@ public class Player : MonoBehaviour
         rb.linearVelocity = Vector2.zero;
 
         manager.OnPlayerDead();
+
+        //audioSource.clip = dieAudioClip;
+        //audioSource.Play();
+
+        audioSource.PlayOneShot(dieAudioClip);
+
     }
 }
